@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="crash(500) — ce site réserve exactement 500 Mo (524 288 000 octets) de mémoire dès qu'on l'ouvre. Statique, zéro config, prêt pour Vercel." />
+  <meta name="theme-color" content="#04060c" />
+  <title>crash(500) — exactement 500 Mo de mémoire</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%A3%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <header class="top">
+      <p class="kicker"><span class="dot" id="dot"></span> crash(500) · verrou mémoire</p>
+      <h1>Ce site utilise <span class="hl">exactement 500 Mo</span> de mémoire.</h1>
+      <p class="sub">
+        Réservation automatique à l’ouverture de la page&nbsp;:
+        <b id="targetMoText">500 Mo</b> = <span id="targetBytesText">524 288 000 octets</span>
+        = 500 × 1024 × 1024. Aucun serveur, aucun build&nbsp;: du HTML/JS statique, prêt pour Vercel.
+      </p>
+    </header>
+
+    <section class="panel gauge-panel" aria-label="état de la réservation mémoire">
+      <div class="gauge">
+        <svg viewBox="0 0 260 260" role="img" aria-label="jauge mémoire">
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3dff8f" />
+              <stop offset="100%" stop-color="#2de2e6" />
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="130" cy="130" r="112" />
+          <circle class="progress" id="gaugeRing" cx="130" cy="130" r="112" />
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-number"><span id="gaugeValue">0</span><span class="gauge-unit">Mo</span></div>
+          <span id="stateChip" class="state-chip idle">EN ATTENTE</span>
+        </div>
+      </div>
+
+      <div class="status-block">
+        <p class="status" id="status" role="status" aria-live="polite">Armement automatique dans un instant…</p>
+        <div class="chips" id="chips"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Pourquoi c’est «&nbsp;exact&nbsp;»&nbsp;?</h2>
+      <ol class="steps">
+        <li><b>Réservation brute</b> — des tampons <code>ArrayBuffer</code> couvrant exactement 524 288 000 octets sont alloués&nbsp;: pas un octet de plus.</li>
+        <li><b>Écriture réelle</b> — chaque octet est rempli (memset)&nbsp;: les pages mémoire sont réellement consommées par le navigateur, et les tampons sont gardés par référence globale (le ramasse-miettes ne peut rien libérer).</li>
+        <li><b>Preuve</b> — contrôle de la taille totale + relecture d’échantillons. La mémoire n’est libérée qu’à la fermeture de l’onglet, ou via le bouton «&nbsp;Libérer&nbsp;».</li>
+      </ol>
+      <p class="warn" id="warn">
+        ⚠️ Note de mesure&nbsp;: la <i>réservation</i> est exacte (524 288 000 octets). Les compteurs du navigateur
+        (Gestionnaire des tâches, <code>usedJSHeapSize</code>) ajoutent le poids du moteur JavaScript et afficheront
+        donc ≈ 500&nbsp;Mo ou un peu plus — jamais moins.
+      </p>
+    </section>
+
+    <div class="actions">
+      <button id="btnRun" class="btn primary" type="button">Armer le verrou (500 Mo)</button>
+      <button id="btnFree" class="btn ghost" type="button" disabled>Libérer la mémoire</button>
+    </div>
+    <p class="footnote">
+      Vérification&nbsp;: Chrome → ⋮ → <b>Plus d’outils</b> → <b>Gestionnaire des tâches</b>, colonne «&nbsp;Mémoire&nbsp;» pour cet onglet.
+      Projet 100&nbsp;% statique — déploiement Vercel sans configuration (voir <code>README.md</code>).
+    </p>
+  </main>
+
+  <footer>crash(500) · 524 288 000 octets = 0x1F400000 · libération automatique à la fermeture de l’onglet</footer>
+
+  <script src="core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
